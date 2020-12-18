@@ -16,13 +16,9 @@ class TELEGRAM_CLIENT:
             try:
                 self.client.send_code_request(self.phone_number)
                 print('Code sent to ' + self.phone_number)
-                return {'response': False,
-                        'code-send': 1}
+                self.code_sent = 1
             except:
-                return {'response': False,
-                        'code-send': False}
-        
-        return {'response': 1}
+                self.code_sent = 0
 
     def is_auth(self):
         if not self.client.is_user_authorized():
@@ -70,6 +66,6 @@ class TELEGRAM_CLIENT:
             client_me = self.client.get_me().stringify()
             return {'response': 1,
                     'client_me': client_me}
-        except:
-            return {'response': False}
+        except AttributeError:
+            return {'response': False, 'ban': 1}
         

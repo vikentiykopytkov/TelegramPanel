@@ -22,7 +22,7 @@ class AUTOREGISTRATION:
                     if state [0] ['response'] == 'TZ_NUM_WAIT':
                         pass
                     else:
-                        return {'response': False,
+                        return {'response': 1,
                                 'code': state [0] ['msg']}
                     timeout += -1
                 else:
@@ -48,26 +48,25 @@ class AUTOREGISTRATION:
                 phone_number=phone_number
                 )
 
-            if telegram ['code-send']:
+            if telegram.code_sent:
                 code = awaiting_code(api=self.sms, tzid=tzid)
                 if code ['response']:
                     telegram.enter_code(code ['code'])
                     if telegram.is_auth() ['response']:
                         self.accounts.append({'session': session,
                                             'phone': phone_number})
-                        return {'response': 1,
-                                'message': 'AccountRegistred'}
+                        print('reg-success')
                 else:
-                    return {'response': False,
-                            'error': code ['error']}
+                    print('reg-er: ' + code ['error'])
             else:
                 print('reg-er: phone banned')
+        return {'response': 1}
 
     def get_account(self, session: dict):
         telegram = tgclient.TELEGRAM_CLIENT(
             id=self.api_id,
             hash=self.api_hash,
             session_name=session ['session'],
-            phone_number=session ['phone_number']
+            phone_number=session ['phone']
             )
         return telegram.get_me()
