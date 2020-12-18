@@ -1,0 +1,3 @@
+from telegram import autoreg
+
+
