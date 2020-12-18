@@ -1,6 +1,5 @@
 import settings
 import telegram
-import smsapi
 import time
 
 ar = telegram.autoreg.AUTOREGISTRATION(
@@ -15,7 +14,7 @@ if __name__ == '__main__':
         ['Дмитрий', 'Иванов'],
         ['Илья', 'Желудов']
         ]
-    response = ar.create_accounts(amount=3,
+    response = ar.create_accounts(amount=1,
                                   proxy=3,
                                   reg_data=names)
     if ar.accounts:

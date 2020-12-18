@@ -1,14 +1,19 @@
 from telethon.sync import TelegramClient
+from telethon import functions, types
 from telethon.errors.rpcerrorlist import PhoneNumberOccupiedError
+import socks
 
 class TELEGRAM_CLIENT:
-    def __init__(self, id: int, hash: str, session_name: str, phone_number: str):
+    def __init__(self, id: int, hash: str, session_name: str, phone_number: str, proxy = None):
         self.api_id = id
         self.api_hash = hash
         self.session_name = session_name
         self.phone_number = phone_number
 
-        self.client = TelegramClient(self.session_name, self.api_id, self.api_hash)
+        self.client = TelegramClient(self.session_name,
+                                     self.api_id,
+                                     self.api_hash,
+                                     proxy = proxy)
 
         self.client.connect()
 
@@ -19,6 +24,13 @@ class TELEGRAM_CLIENT:
                 self.code_sent = 1
             except:
                 self.code_sent = 0
+
+    def close_connection(self):
+        try:
+            self.client.disconnect()
+            return {'response': 1}
+        except:
+            return {'response': False}
 
     def is_auth(self):
         if not self.client.is_user_authorized():
@@ -66,6 +78,15 @@ class TELEGRAM_CLIENT:
             client_me = self.client.get_me().stringify()
             return {'response': 1,
                     'client_me': client_me}
-        except AttributeError:
+        except:
             return {'response': False, 'ban': 1}
-        
+
+    def change_username(self, username: str):
+        try:
+            result = self.client(functions.account.UpdateUsernameRequest(
+                    username=username
+                    ))
+            return {'response': 1,
+                    'result': result.stringify()}
+        except:
+            return {'response': False}

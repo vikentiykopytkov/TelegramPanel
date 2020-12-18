@@ -1,4 +1,4 @@
-import smsapi
+from sms import onlinesim
 from telegram import tgclient
 import settings
 import random
@@ -9,7 +9,7 @@ class AUTOREGISTRATION:
         self.api_id = API_ID
         self.api_hash = API_HASH
         self.sid = session_id
-        self.sms = smsapi.ONLINESIM_API(API_KEY = settings.API_KEY)
+        self.sms = onlinesim.ONLINESIM_API(API_KEY = settings.API_KEY)
         self.accounts = []
 
     def create_accounts(self, reg_data: list = [['Ivan', 'Ivanov']], amount = 1, proxy = 1):
@@ -34,9 +34,11 @@ class AUTOREGISTRATION:
         for i in range(0, amount):
             flag = True
             number = self.sms.get_number('telegram')
+            
             if number ['response'] == 'WARNING_LOW_BALANCE':
                 return {'response': False,
                         'error': 'SMSNoBalance'}
+            
             phone_number, tzid = number['number'], number['tzid']
             last_num += random.randint(0, 100)
             session = self.sid + '_' + str(last_num)
@@ -51,11 +53,15 @@ class AUTOREGISTRATION:
             if telegram.code_sent:
                 code = awaiting_code(api=self.sms, tzid=tzid)
                 if code ['response']:
-                    telegram.enter_code(code ['code'])
+                    telegram.enter_code(code ['code'], 
+                                        reg_data=reg_data[i])
                     if telegram.is_auth() ['response']:
                         self.accounts.append({'session': session,
                                             'phone': phone_number})
-                        print('reg-success')
+                        if telegram.change_username(username=session) ['response']:
+                            telegram.close_connection()
+                            print('reg-success')
+
                 else:
                     print('reg-er: ' + code ['error'])
             else:
