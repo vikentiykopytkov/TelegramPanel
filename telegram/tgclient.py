@@ -13,9 +13,14 @@ class TELEGRAM_CLIENT:
         self.client.connect()
 
         if not self.client.is_user_authorized():
-            self.client.send_code_request(self.phone_number)
-            print('Code sent to ' + self.phone_number)
-            return {'response': False}
+            try:
+                self.client.send_code_request(self.phone_number)
+                print('Code sent to ' + self.phone_number)
+                return {'response': False,
+                        'code-send': 1}
+            except:
+                return {'response': False,
+                        'code-send': False}
         
         return {'response': 1}
 

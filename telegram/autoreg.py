@@ -41,29 +41,27 @@ class AUTOREGISTRATION:
             last_num += random.randint(0, 100)
             session = self.sid + '_' + str(last_num)
 
-            try:
-                telegram = tgclient.TELEGRAM_CLIENT(
-                    id=self.api_id,
-                    hash=self.api_hash,
-                    session_name=session,
-                    phone_number=phone_number
-                    )
-            except:
-                return {'response': False,
-                        'error': 'PhoneBanned'}
-                break
-                
-            code = awaiting_code(api=self.sms, tzid=tzid)
-            if code ['response']:
-                telegram.enter_code(code ['code'])
-                if telegram.is_auth() ['response']:
-                    self.accounts.append({'session': session,
-                                        'phone': phone_number})
-                    return {'response': 1,
-                            'message': 'AccountRegistred'}
+            telegram = tgclient.TELEGRAM_CLIENT(
+                id=self.api_id,
+                hash=self.api_hash,
+                session_name=session,
+                phone_number=phone_number
+                )
+
+            if telegram ['code-send']:
+                code = awaiting_code(api=self.sms, tzid=tzid)
+                if code ['response']:
+                    telegram.enter_code(code ['code'])
+                    if telegram.is_auth() ['response']:
+                        self.accounts.append({'session': session,
+                                            'phone': phone_number})
+                        return {'response': 1,
+                                'message': 'AccountRegistred'}
+                else:
+                    return {'response': False,
+                            'error': code ['error']}
             else:
-                return {'response': False,
-                        'error': code ['error']}
+                print('reg-er: phone banned')
 
     def get_account(self, session: dict):
         telegram = tgclient.TELEGRAM_CLIENT(
