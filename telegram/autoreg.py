@@ -9,41 +9,67 @@ class AUTOREGISTRATION:
         self.api_id = API_ID
         self.api_hash = API_HASH
         self.sid = session_id
-        self.api = smsapi.ONLINESIM_API(API_KEY = settings.API_KEY)
+        self.sms = smsapi.ONLINESIM_API(API_KEY = settings.API_KEY)
         self.accounts = []
 
-    def create_accounts(self, amount = 1, proxy = 1):
+    def create_accounts(self, reg_data: list = [['Ivan', 'Ivanov']], amount = 1, proxy = 1):
+        def awaiting_code(api, tzid: int, timeout: int = 60):
+            while flag:
+                if timeout:
+                    time.sleep(1)
+                    state = api.get_state(tzid)
+                    print(state)
+                    if state [0] ['response'] == 'TZ_NUM_WAIT':
+                        pass
+                    else:
+                        return {'response': False,
+                                'code': state [0] ['msg']}
+                    timeout += -1
+                else:
+                    return {'response': False,
+                            'error': 'SMSTimeout'}
+                
         last_num = sum(self.accounts)
+        
         for i in range(0, amount):
             flag = True
-            number = self.api.get_number('telegram')
-            phone_number = number['number']
-            tzid = number['tzid']
+            number = self.sms.get_number('telegram')
+            if number ['response'] == 'WARNING_LOW_BALANCE':
+                return {'response': False,
+                        'error': 'SMSNoBalance'}
+            phone_number, tzid = number['number'], number['tzid']
             last_num += random.randint(0, 100)
+            session = self.sid + '_' + str(last_num)
+
             try:
                 telegram = tgclient.TELEGRAM_CLIENT(
                     id=self.api_id,
                     hash=self.api_hash,
-                    session_name=self.sid+'_'+str(last_num),
+                    session_name=session,
                     phone_number=phone_number
                     )
             except:
-                print('Phone has been banned')
+                return {'response': False,
+                        'error': 'PhoneBanned'}
                 break
-            while flag:
-                time.sleep(1)
-                state = self.api.get_state(tzid)
-                print(state)
-                if state [0] ['response'] == 'TZ_NUM_WAIT':
-                    pass
-                else:
-                    code = state [0] ['msg']
-                    flag = False
-            telegram.enter_code(code)
-            print(telegram.get_me())
-            self.accounts.append(telegram)
+                
+            code = awaiting_code(api=self.sms, tzid=tzid)
+            if code ['response']:
+                telegram.enter_code(code ['code'])
+                if telegram.is_auth() ['response']:
+                    self.accounts.append({'session': session,
+                                        'phone': phone_number})
+                    return {'response': 1,
+                            'message': 'AccountRegistred'}
+            else:
+                return {'response': False,
+                        'error': code ['error']}
 
-    def get_account(self):
-        number = api.get_number('telegram')
-        phone_number = number['number']
-        tzid = number['tzid']
+    def get_account(self, session: dict):
+        telegram = tgclient.TELEGRAM_CLIENT(
+            id=self.api_id,
+            hash=self.api_hash,
+            session_name=session ['session'],
+            phone_number=session ['phone_number']
+            )
+        return telegram.get_me()

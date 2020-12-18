@@ -1,4 +1,5 @@
 from telethon.sync import TelegramClient
+from telethon.errors.rpcerrorlist import PhoneNumberOccupiedError
 
 class TELEGRAM_CLIENT:
     def __init__(self, id: int, hash: str, session_name: str, phone_number: str):
@@ -14,6 +15,9 @@ class TELEGRAM_CLIENT:
         if not self.client.is_user_authorized():
             self.client.send_code_request(self.phone_number)
             print('Code sent to ' + self.phone_number)
+            return {'response': False}
+        
+        return {'response': 1}
 
     def is_auth(self):
         if not self.client.is_user_authorized():
@@ -21,15 +25,17 @@ class TELEGRAM_CLIENT:
         else:
             return {'response': 1}
 
-    def enter_code(self, code):
+    def enter_code(self, code, reg_data: list = ['Ivan', 'Ivanov']):
         try:
-            self.me = self.client.sign_in(self.phone_number, code)
+            self.me = self.client.sign_up(code=code,
+                                          first_name=reg_data[0],
+                                          last_name=reg_data[1])
             if not self.client.is_user_authorized():
                 return {'response': False}
             else:
                 return {'response': 1}
-        except telethon.errors.rpcerrorlist.PhoneNumberUnoccupiedError:
-            self.me = self.client.sign_up(self.phone_number, code)
+        except telethon.errors.rpcerrorlist.PhoneNumberOccupiedError:
+            self.me = self.client.sign_in(self.phone_number, code)
             if not self.client.is_user_authorized():
                 return {'response': False}
             else:
