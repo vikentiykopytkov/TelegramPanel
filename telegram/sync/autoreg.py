@@ -1,5 +1,5 @@
 from sms import onlinesim
-from telegram import tgclient
+from telegram.sync import tgclient
 import settings
 import random
 import time
