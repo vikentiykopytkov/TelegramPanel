@@ -54,12 +54,15 @@ class AUTOREGISTRATION:
             if telegram.code_sent:
                 code = await awaiting_code(api=self.sms, tzid=tzid)
                 if code ['response']:
+                    asyncio.sleep(5)
                     await telegram.enter_code(code ['code'],
                                               reg_data=reg_data[i])
                     if await telegram.is_auth() ['response']:
+                        asyncio.sleep(5)
                         self.accounts.append({'session': session,
                                             'phone': phone_number})
                         if await telegram.change_username(username=session) ['response']:
+                            asyncio.sleep(5)
                             await telegram.close_connection()
                             print('reg-success')
 

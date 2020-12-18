@@ -1,5 +1,6 @@
 from sms import onlinesim
 from telegram.sync import tgclient
+import socks
 import settings
 import random
 import time
@@ -47,21 +48,24 @@ class AUTOREGISTRATION:
                 id=self.api_id,
                 hash=self.api_hash,
                 session_name=session,
-                phone_number=phone_number
+                phone_number=phone_number,
+                proxy = (socks.SOCKS5, '188.124.36.164', 1080)
                 )
 
             if telegram.code_sent:
                 code = awaiting_code(api=self.sms, tzid=tzid)
                 if code ['response']:
+                    time.sleep(5)
                     telegram.enter_code(code ['code'], 
                                         reg_data=reg_data[i])
                     if telegram.is_auth() ['response']:
+                        time.sleep(5)
                         self.accounts.append({'session': session,
                                             'phone': phone_number})
                         if telegram.change_username(username=session) ['response']:
+                            time.sleep(5)
                             telegram.close_connection()
                             print('reg-success')
-
                 else:
                     print('reg-er: ' + code ['error'])
             else:
