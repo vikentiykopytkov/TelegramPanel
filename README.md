@@ -11,7 +11,7 @@ Next-gen client for telegram
 - automatic "warming up" of accounts
 
 ## Release date
-The software is expected by March 31
+Software development suspended
 
 ## Developers
 Vikentiy Kopytkov
